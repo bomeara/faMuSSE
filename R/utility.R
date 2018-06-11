@@ -109,8 +109,9 @@ S=nchar
 partitionSize<-nchar
 
 #utility functions
-toBinLarge<-function (x, base = 2, ndigits = 2^S)  #modification from sfsmisc package to deal with large numbers
+toBinLarge<-function (x, base = 2, S=6)  #modification from sfsmisc package to deal with large numbers
 {
+	ndigits = 2^S
 	if (class(x)!="bigz") {
 		x<-as.bigz(x)
 	}
@@ -162,18 +163,18 @@ vectorMismatchExcludePositions<-function(vector1, vector2, excludePositions) {
 }
 
 #comboDecimal go from 1:2^S
-comboAsBinaryVector<-function(comboDecimal,S) { #works best of combo Decimal is bigz class
+comboAsBinaryVector<-function(comboDecimal,S=6) { #works best of combo Decimal is bigz class
 	if (class(comboDecimal)!="bigz") {
 		comboDecimal<-as.bigz(comboDecimal)
 	}
-	return(toBinLarge(comboDecimal-1,ndigits=S)) #since this goes from 000000 -> 111111
+	return(toBinLarge(comboDecimal-1,S=S)) #since this goes from 000000 -> 111111
 }
 
-comboAsBinaryString<-function(comboDecimal,S) {
+comboAsBinaryString<-function(comboDecimal,S=6) {
 	return(paste(comboAsBinaryVector(comboDecimal,S),sep="",collapse=""))
 }
 
-comboAsDecimal<-function(comboBinary,S) {
+comboAsDecimal<-function(comboBinary,S=6) {
 	if (length(comboBinary)==1) { #we have a string, first make it a vector
 		comboBinary<-strsplit(comboBinary,split="")[[1]]
 	}
@@ -184,19 +185,19 @@ comboAsDecimal<-function(comboBinary,S) {
 
 #focalAsBinaryVector goes from 000......000 (nothing is special) to 111......111 (all is special). Is of length 2^6.
 #so if it is 110000...000  only combo numbers 1 and 2 are in the focal set
-focalAsBinaryVector<-function(focalDecimal,S) { #works best if focalDecimal is bigz class
+focalAsBinaryVector<-function(focalDecimal,S=6) { #works best if focalDecimal is bigz class
 	if (class(focalDecimal)!="bigz") {
 		warning("converting from a decimal to a focal binary vector will not work well if the decimal is not in bigz format for large values (R
 with integers)")
 	}
-	return(toBinLarge(focalDecimal,ndigits=2^S))
+	return(toBinLarge(focalDecimal,S=S))
 }
 
-focalAsBinaryString<-function(focalDecimal,S) {
+focalAsBinaryString<-function(focalDecimal,S=6) {
 	return(paste(focalAsBinaryVector(focalDecimal,S),sep="",collapse=""))
 }
 
-focalAsDecimal<-function(focalBinary,S) {
+focalAsDecimal<-function(focalBinary,S=6) {
 	if (length(focalBinary)==1) { #we have a string, first make it a vector
 		focalBinary<-strsplit(focalBinary,split="")[[1]]
 	}
@@ -223,7 +224,7 @@ vectorToString<-function(inVector) {
 maxFocalAsBinaryVector<-rep(1,2^S)
 
 
-createComboMatrix<-function(focalBinaryVector,S) {
+createComboMatrix<-function(focalBinaryVector,S=6) {
 	focalCombos<-convertFocalToCombos(focalBinaryVector)
 	comboMatrix<-matrix()
 	if (length(focalCombos)>0) {
@@ -239,7 +240,7 @@ createComboMatrix<-function(focalBinaryVector,S) {
 	return(comboMatrix)
 }
 
-getFocalSummaryLabel<-function(focalBinaryVector,S,any="*") {
+getFocalSummaryLabel<-function(focalBinaryVector,S=6,any="*") {
 	comboMatrix<-createComboMatrix(focalBinaryVector,S)
 	labelVector<-rep(any,S)
 	if (numberFocalCombos(focalBinaryVector)>1) {
@@ -255,7 +256,7 @@ getFocalSummaryLabel<-function(focalBinaryVector,S,any="*") {
 	return(labelVector)
 }
 
-interestingFocal<-function(focalBinaryVector,S) {
+interestingFocal<-function(focalBinaryVector,S=6) {
 	interestingFocal<-FALSE
 	if (sum(focalBinaryVector)>0.5*length(focalBinaryVector)) { #too many focal combos (don't want more than half the combos)
 		return(FALSE)
@@ -274,7 +275,7 @@ interestingFocal<-function(focalBinaryVector,S) {
 	return(interestingFocal)
 }
 
-getAllInterestingFocalVectorsInefficient<-function(S){
+getAllInterestingFocalVectorsInefficient<-function(S=6, file="interestingFocalDataFrame.Rsave"){
 	focalDecimal<-as.bigz(0)
 	focalVector<-focalAsBinaryVector(focalDecimal,S)
 	totalInterestingFocal<-0
@@ -290,7 +291,7 @@ getAllInterestingFocalVectorsInefficient<-function(S){
 			else {
 				interestingFocalDataFrame<-rbind(interestingFocalDataFrame,data.frame(cbind(as.character.bigz(focalDecimal),vectorToString(getFocalSummaryLabel(focalVector,S,"x")),numberFocalCombos(focalVector),vectorToString(focalVector)),stringsAsFactors=FALSE))
 			}
-			save(interestingFocalDataFrame,file="/Users/bomeara/Dropbox/Floral/RunsJan2012/SourceData/interestingFocalDataFrame.Rsave",compress=TRUE)
+			save(interestingFocalDataFrame,file=file,compress=TRUE)
 			print(paste(vectorToString(getFocalSummaryLabel(focalVector,S)), ":",totalInterestingFocal, "/",totalAllFocal,vectorToString(focalVector),sep=" ",collapse=""))
 		}
 		focalDecimal<-focalDecimal+1
@@ -298,7 +299,7 @@ getAllInterestingFocalVectorsInefficient<-function(S){
 	}
 }
 
-convertFocalLabelToFocalVector<-function(focalLabel,S,uncertainty="2") {
+convertFocalLabelToFocalVector<-function(focalLabel,S=6,uncertainty="2") {
 	labelVector<-strsplit(focalLabel,split="")[[1]]
 	uncertainChars<-which(labelVector==uncertainty)
 	focalVector<-rep(0,2^S)
@@ -312,7 +313,7 @@ convertFocalLabelToFocalVector<-function(focalLabel,S,uncertainty="2") {
 
 
 #Here's the new one that includes 2******
-getAllInterestingFocalVectorsStringsEfficient<-function(S) {
+getAllInterestingFocalVectorsStringsEfficient<-function(S=6) {
   focalVectorList<-list()
    maxNumber<-3^S #could have state 0, 1, or 2
    for (i in 0:(maxNumber-1)) {
@@ -330,7 +331,7 @@ getAllInterestingFocalVectorsStringsEfficient<-function(S) {
    return(focalVectorList)
 }
 
-summarizeModelWeights<-function(summary.dataframe=summary.dataframe,S=S,transitionModels=transitionModels, diversificationModels=diversificationModels) {
+summarizeModelWeights<-function(summary.dataframe=summary.dataframe,S=6,transitionModels=transitionModels, diversificationModels=diversificationModels) {
 	modelWeights<-matrix(0,nrow=1+dim(transitionModels)[1],ncol=1+dim(diversificationModels)[1])
 	for (transitionIndex in 1:dim(transitionModels)[1]) {
 		t.summary.dataframe<-subset(summary.dataframe,T==transitionIndex)
