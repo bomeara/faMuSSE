@@ -1,31 +1,36 @@
-library(diversitree) #obvious
-library(sfsmisc) #for counting in binary
-library(partitions) #for converting from binary back to decimal
-library(gmp) #for dealing with big integers
+#library(diversitree) #obvious
+#library(sfsmisc) #for counting in binary
+#library(partitions) #for converting from binary back to decimal
+#library(gmp) #for dealing with big integers
+
+#' @import diversitree
+#' @import sfsmisc
+#' @import partitions
+#' @import gmp
 
 
-#' basic idea:
-#' 6 binary traits
-#' means 2^6 = 64 possible character-state combinations (note: not all of them are realized)
-#' select between 0 and 32 of these combos as "focal" ones
-#' syntax for focal set: a 64-long binary string, telling whether a given combo is in the focal set
-#' filter these for meaningful sets: a set consisting of combos that are 0*1**** is meaningful, for example
-#' [problem: equal sets: 0****** vs 1****** are the same under full models (i.e., different birth, death, and transition rates -- but only in that case]
+# basic idea:
+# 6 binary traits
+# means 2^6 = 64 possible character-state combinations (note: not all of them are realized)
+# select between 0 and 32 of these combos as "focal" ones
+# syntax for focal set: a 64-long binary string, telling whether a given combo is in the focal set
+# filter these for meaningful sets: a set consisting of combos that are 0*1**** is meaningful, for example
+# [problem: equal sets: 0****** vs 1****** are the same under full models (i.e., different birth, death, and transition rates -- but only in that case]
 
-#' transition models:
-#'	There are four transition rates q_focal->nonfocal, q_focal->focal, q_nonfocal->nonfocal, q_nonfocal->focal = qFN, qFF, qNF, qNF. Note that you can have within set transitions where the number of combos in a set is greater than 1: set 0*1**** has a 0010000->0010001 transition rate
-#'	1: all rates the same: qNF=qNN=qFF=qFN
-#'	2: inflow different: qNF vs qNN=qFF=qFN
-#'	3: outflow different: qFN vs qNN=qFF=qNF
-#'	4: inflow and outflow different: qFN vs qNF vs qFF=qNN
-#'	5: freedom: qFN vs qNF vs qFF vs qNN
+# transition models:
+#	There are four transition rates q_focal->nonfocal, q_focal->focal, q_nonfocal->nonfocal, q_nonfocal->focal = qFN, qFF, qNF, qNF. Note that you can have within set transitions where the number of combos in a set is greater than 1: set 0*1**** has a 0010000->0010001 transition rate
+#	1: all rates the same: qNF=qNN=qFF=qFN
+#	2: inflow different: qNF vs qNN=qFF=qFN
+#	3: outflow different: qFN vs qNN=qFF=qNF
+#	4: inflow and outflow different: qFN vs qNF vs qFF=qNN
+#	5: freedom: qFN vs qNF vs qFF vs qNN
 
-#' Get the transition models
-#'
-#' Simple function to generate the potential transition models. Modify as you wish
-#'
-#' @return data.frame of transition models
-#' @export
+
+# Get the transition models
+#
+# Simple function to generate the potential transition models. Modify as you wish
+#
+# @return data.frame of transition models
 transitionModels <- function() {
 	transitionModels<-data.frame(cbind(c(1:5),c(1,2,2,3,4),c(0,1,1,1,2),c("equal","inflow","outflow","inandoutflow","free")),stringsAsFactors=FALSE)
 	names(transitionModels)<-c("T","k_q","min_focalcombos","description") #the min focal states is because some models don't make sense in certain cases. For example, if you have one focal state, models that have qFF as a free parameter don't make sense
@@ -104,9 +109,9 @@ extralistD <- function() {
 # constrain root state = 0000000
 
 #Global definitions
-nchar=6
-S=nchar
-partitionSize<-nchar
+#nchar=6
+#S=nchar
+#partitionSize<-nchar
 
 #utility functions
 toBinLarge<-function (x, base = 2, S=6)  #modification from sfsmisc package to deal with large numbers
@@ -221,7 +226,9 @@ vectorToString<-function(inVector) {
 	return(paste(inVector,sep="",collapse=""))
 }
 
-maxFocalAsBinaryVector<-rep(1,2^S)
+maxFocalAsBinaryVector <- function(S=6) {
+	return(rep(1,2^S))
+}
 
 
 createComboMatrix<-function(focalBinaryVector,S=6) {

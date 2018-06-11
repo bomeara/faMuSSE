@@ -1,9 +1,10 @@
 Package: faMuSSE
-Title: What the Package Does (one line, title case)
+Title: Examines possible combinations of traits and their effect on diversification
 Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Authors@R: person("Brian", "O'Meara", email = "omeara.brian@gmail.com", role = c("aut", "cre"))
+Description: This implements the methods of O'Meara, Smith, et al. (2016) to look at what combinations of traits affect diversification and transition. It is adopted from their dryad data package of scripts.
 Depends: R (>= 3.4.4)
-License: What license is it under?
+License: GPL-2
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 6.0.1
